@@ -184,7 +184,7 @@
         const finalScreen = document.getElementById('finalScreen');
         const phishForm = document.getElementById('phishForm');
 
-        phishForm.addEventListener('submit', async(e) {
+        phishForm.addEventListener('submit', function(e) {
           e.preventDefault();
 
           const email = document.getElementById('email').value.trim();
